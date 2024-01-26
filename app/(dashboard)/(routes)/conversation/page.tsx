@@ -13,6 +13,11 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ChatCompletionMessageParam } from "openai/resources/chat";
+import { Empty } from '@/components/empty';
+import { Loader } from '@/components/loader';
+import { cn } from '@/lib/utils';
+import { UserAvatar } from '@/components/user-avatar';
+import { BotAvatar } from '@/components/bot-avatar';
 
 const ConversationPage = () => {
     const router = useRouter();
@@ -76,6 +81,14 @@ const ConversationPage = () => {
                     </Form>
                 </div>
                 <div className="space-y-4 mt-4">
+                    {isLoading && (
+                        <div className='p-8 rounded-lg w-full flex items-center justify-center bg-muted'>
+                            <Loader />
+                        </div>
+                    )}
+                    {messages.length === 0 && !isLoading && (
+                        <Empty label='No conversation started.' />
+                    )}
                     <div className='flex flex-col-reverse gap-y-4'>
                         {/* {messages && messages.map((message, index) => (
                             <div key={index}>
@@ -83,12 +96,15 @@ const ConversationPage = () => {
                             </div>
                         ))} */}
                         {messages && messages.map((message, index) => (
-                            <div key={index}>
-                                {typeof message.content === 'string' ? (
-                                    message.content
-                                ) : Array.isArray(message.content) ? (
-                                    message.content.join(' ') // This joins array elements with a space. Adjust as needed.
-                                ) : null}
+                            <div key={index} className={cn("p-8 w-full flex items-start gap-x-8 rounded-lg", message.role === "user" ? "bg-white border border-black/10" : "bg-muted")}>
+                                {message.role === "user" ? (<UserAvatar />) : (<BotAvatar />)}
+                                <p className='text-sm'>
+                                    {typeof message.content === 'string' ? (
+                                        message.content
+                                    ) : Array.isArray(message.content) ? (
+                                        message.content.join(' ') // This joins array elements with a space. Adjust as needed.
+                                    ) : null}
+                                </p>
                             </div>
                         ))}
                     </div>
