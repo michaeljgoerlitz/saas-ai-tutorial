@@ -76,7 +76,22 @@ const ConversationPage = () => {
                     </Form>
                 </div>
                 <div className="space-y-4 mt-4">
-                    Message Content
+                    <div className='flex flex-col-reverse gap-y-4'>
+                        {/* {messages && messages.map((message, index) => (
+                            <div key={index}>
+                                {message.content}
+                            </div>
+                        ))} */}
+                        {messages && messages.map((message, index) => (
+                            <div key={index}>
+                                {typeof message.content === 'string' ? (
+                                    message.content
+                                ) : Array.isArray(message.content) ? (
+                                    message.content.join(' ') // This joins array elements with a space. Adjust as needed.
+                                ) : null}
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         </div>
