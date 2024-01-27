@@ -26,14 +26,25 @@ export async function POST(
             return new NextResponse("Prompt is required", { status: 400 });
         }
 
-        const response = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo",
-            messages: [],
+        if (!amount) {
+            return new NextResponse("Amount is required", { status: 400 });
+        }
+
+        if (!resolution) {
+            return new NextResponse("Resolution is required", { status: 400 });
+        }
+
+        const response = await openai.images.generate({
+            prompt,
+            n: parseInt(amount, 10),
+            size: resolution,
         });
 
-        return NextResponse.json(response.choices[0].message); // might want to change this
+        return NextResponse.json(response.data.data)
+
+        // return NextResponse.json(response.data); // might want to change this
     } catch (error) {
-        console.log("[CONVERSATION_ERROR]", error);
+        console.log("[IMAGE_ERROR]", error);
         return new NextResponse("Internal error", { status: 500 });
     }
 }
