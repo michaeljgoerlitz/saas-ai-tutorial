@@ -6,7 +6,7 @@ import { Heading } from "@/components/heading";
 import { ImageIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { formSchema } from "./constants";
+import { amountOptions, formSchema, resolutionOptions } from "./constants";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -15,8 +15,7 @@ import { useState } from 'react';
 import { Empty } from '@/components/empty';
 import { Loader } from '@/components/loader';
 import { cn } from '@/lib/utils';
-import { UserAvatar } from '@/components/user-avatar';
-import { BotAvatar } from '@/components/bot-avatar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const ImagePage = () => {
     const router = useRouter();
@@ -25,7 +24,9 @@ const ImagePage = () => {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            prompt: ""
+            prompt: "",
+            amount: "1",
+            resolution: "512x512"
         }
     });
 
@@ -33,7 +34,11 @@ const ImagePage = () => {
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
-            const response = await axios.post("api/conversation");
+            setImages([]);
+            const response = await axios.post("api/image", values);
+
+            const urls = response.data.map((image: {url: string}) => image.url);
+            setImages(urls);
 
             form.reset();
         } catch (error: any) {
@@ -59,10 +64,54 @@ const ImagePage = () => {
                             <FormField name="prompt" render={({ field }) => (
                                 <FormItem className="col-span-12 lg:col-span-10">
                                     <FormControl className="m-0 p-0">
-                                        <Input className="border-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent" disabled={isLoading} placeholder="How do I calculate the radius of a circle?" {...field}/>
+                                        <Input className="border-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent" disabled={isLoading} placeholder="A picture of a horse in the Swiss Alps" {...field}/>
                                     </FormControl>
                                 </FormItem>
                             )}/>
+                            <FormField 
+                                control={form.control}
+                                name="amount"
+                                render={({ field }) => (
+                                    <FormItem className='col-span-12 lg:col-span-6'>
+                                        <Select disabled={isLoading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue  defaultValue={field.value}/>
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {amountOptions.map((option) => (
+                                                    <SelectItem key={option.value} value={option.value}>
+                                                        {option.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField 
+                                control={form.control}
+                                name="resolution"
+                                render={({ field }) => (
+                                    <FormItem className='col-span-12 lg:col-span-6'>
+                                        <Select disabled={isLoading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue  defaultValue={field.value}/>
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {resolutionOptions.map((option) => (
+                                                    <SelectItem key={option.value} value={option.value}>
+                                                        {option.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </FormItem>
+                                )}
+                            />
                             <Button className="col-span-12 lg:col-span-2 w-full" disabled={isLoading}>
                                 Generate
                             </Button>
@@ -71,12 +120,12 @@ const ImagePage = () => {
                 </div>
                 <div className="space-y-4 mt-4">
                     {isLoading && (
-                        <div className='p-8 rounded-lg w-full flex items-center justify-center bg-muted'>
+                        <div className='p-20'>
                             <Loader />
                         </div>
                     )}
-                    {messages.length === 0 && !isLoading && (
-                        <Empty label='No conversation started.' />
+                    {images.length === 0 && !isLoading && (
+                        <Empty label='No images generated.' />
                     )}
                     <div>
                         Images will be rendered here
