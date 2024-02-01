@@ -7,6 +7,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Code, ImageIcon, LayoutDashboard, MessageSquare, Music, Settings, VideoIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { FreeCounter } from "@/components/free-counter";
 
 const montserrat = Montserrat({ weight: '600', subsets: ["latin"]});
 
@@ -93,7 +94,7 @@ const Sidebar = ({
                     ))}
                 </div>
             </div>
-            <FreeCounter 
+            <FreeCounter
                 apiLimitCount={apiLimitCount}
             />
         </div>
